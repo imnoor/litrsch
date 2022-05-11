@@ -1,10 +1,9 @@
 import sys
 sys.path.append('../src/')
 
-from bib_processor import BiBProcessor
-import ml_lit
+from src.bib_processor import BiBProcessor
 
-processor = BiBProcessor('../bibtex_collection.bib')
+processor = BiBProcessor('bibtex_collection.bib')
 processor.preparser()
 tags = processor.get_tags() 
       

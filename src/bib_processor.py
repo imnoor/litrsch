@@ -3,7 +3,7 @@ from collections import Counter
 from string import punctuation
 from nltk.corpus import stopwords
 from nltk.corpus import wordnet
-from syndict import SynDict
+from src.syndict import SynDict
 import matplotlib.pyplot as plt
 import itertools
 import spacy
