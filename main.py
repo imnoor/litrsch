@@ -16,8 +16,9 @@ with open(filename) as f:
 noise_set = set(noise_list)
 
 for tag in tags:
-    print(tag)
     processor.filter_tag([tag])
     theme_data = processor.get_themes(filter_list,50, noise_list=noise_set)
+    print(tag + " Records " + str(theme_data['records']))
     print(theme_data['common'])
+
 
