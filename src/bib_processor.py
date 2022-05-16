@@ -39,31 +39,55 @@ class BiBProcessor:
         self.filtered = self.preprocessed.copy()
         for item in self.filtered:
             if 'mendeley-tags' in item.fields:
-                set_A = set(item.fields['mendeley-tags'].split(","))
-                set_B = set(tags)
-                if ( not set_A.intersection(set_B) == set()) :
+                if len(tags) == 0 :
                     tagged.append(item)
+                else:
+                    set_A = set(item.fields['mendeley-tags'].split(","))
+                    set_B = set(tags)
+                    if ( not set_A.intersection(set_B) == set()) :
+                        tagged.append(item)
+                        
         self.filtered = tagged
         
     def get_themes(self,filter_list=[], top=10, noise_list=[]):       
         words = []
         for entry in self.filtered:
             abstract = entry.fields['abstract'].upper()
-            has_key = [ele for ele in filter_list if(ele in abstract)]
-            edit_string_as_list = abstract.split()
-            first_filter = [word for word in edit_string_as_list if word not in filter_list]
-            noise_filtered = [word for word in first_filter if word not in noise_list]
-            abstract = ' '.join(noise_filtered)
-            abstract = self.normalize_textual_information(abstract)
-            abstract = self.apply_semantic_tranform(abstract)
-            if has_key:
-                p = self.nlp(abstract)
-                words.append([t.text for t in p if not t.is_stop and not t.is_punct])
-                
+            words += self.sanitize(abstract, filter_list=filter_list,noise_list=noise_list)
         words = itertools.chain(*words)
         counter_data = Counter(list(words))
         common_words = counter_data.most_common(top)
         return {'common' : common_words, 'data' : counter_data,'records': len(self.filtered)}
+    
+    def get_aggregate_themes(self, keywords=[],top=10, noise_list=[] ):
+        words = []
+        for entry in self.filtered:
+            abstract = entry.fields['abstract'].upper()
+            words += self.sanitize(abstract, keywords=keywords, filter_list=[],noise_list=noise_list)
+        #words = itertools.chain(*words)
+        #counter_data = Counter(list(words))
+        counter_data = Counter(words)
+        common_words = counter_data.most_common(top)
+        return {'common' : common_words, 'data' : counter_data,'records': len(self.filtered)}
+    
+    def sanitize(self,text, keywords=[], filter_list=[], noise_list=[]):
+        words =[]
+        has_key = [ele for ele in filter_list if(ele in text)]
+        edit_string_as_list = text.split()
+        first_filter = [word for word in edit_string_as_list if word not in filter_list]
+        noise_filtered = [word for word in first_filter if word not in noise_list]
+        if len(keywords) > 0: 
+            keyword_filtered= [word for word in noise_filtered if word in keywords]
+            words = keywords
+        else:
+            keyword_filtered= noise_filtered
+            text = ' '.join(keyword_filtered)
+            text = self.normalize_textual_information(text)
+            text = self.apply_semantic_tranform(text)
+            if has_key:
+                p = self.nlp(text)
+                words.append([t.text for t in p if not t.is_stop and not t.is_punct])
+        return words
     
     def normalize_textual_information(self, text):
         # split text into tokens by white space
