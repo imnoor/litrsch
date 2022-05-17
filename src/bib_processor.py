@@ -66,6 +66,7 @@ class BiBProcessor:
             words += self.sanitize(abstract, keywords=keywords, filter_list=[],noise_list=noise_list)
         #words = itertools.chain(*words)
         #counter_data = Counter(list(words))
+        #print(words)
         counter_data = Counter(words)
         common_words = counter_data.most_common(top)
         return {'common' : common_words, 'data' : counter_data,'records': len(self.filtered)}
@@ -78,7 +79,7 @@ class BiBProcessor:
         noise_filtered = [word for word in first_filter if word not in noise_list]
         if len(keywords) > 0: 
             keyword_filtered= [word for word in noise_filtered if word in keywords]
-            words = keywords
+            words = keyword_filtered
         else:
             keyword_filtered= noise_filtered
             text = ' '.join(keyword_filtered)
